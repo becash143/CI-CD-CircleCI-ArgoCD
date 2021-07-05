@@ -5,8 +5,9 @@
 ```helm install my-sample-app ./myapp-helm-chart``` 
 
 Configure as per ArgoCD document [ArgoCD](https://argo-cd.readthedocs.io/en/stable/).
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg.png)
 ![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg1.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg22.png)
 ![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_sync.png)
 ![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd.png)
 ![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd.png) 
