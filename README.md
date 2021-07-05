@@ -1,4 +1,4 @@
-#circleci-and-ArgoCD-CI-CD
+# circleci-and-ArgoCD-CI-CD
 
 ```docker build --build-arg code_version=210705-4c3fcd3 --build-arg db-name=mysql  -t bikclu/sample-app:1.0.0 .```
 
