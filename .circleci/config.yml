@@ -20,7 +20,7 @@ commands:
     steps:
       - run:
           name: Login into ECR
-          command: docker login -u $MY_CRED -p $MY_CRED docker.io
+          command: docker login -u $MY_USER -p $MY_CRED docker.io
   # Build docker images
   build_image:
     steps:
