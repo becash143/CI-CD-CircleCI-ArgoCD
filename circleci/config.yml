@@ -1,0 +1,54 @@
+version: "2.1"
+orbs:
+    kube-orb: circleci/kubernetes@0.11.2
+    helm: circleci/helm@1.1.1
+
+executors:
+  base_image:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+
+commands:
+  # Setting up docker layer caching
+  # Logging into ECR
+  #
+  docker_caching:
+    steps:
+      - setup_remote_docker:
+          version: 19.03.13
+  login:
+    steps:
+      - run:
+          name: Login into ECR
+          command: docker login -u $MY_CRED -p $MY_CRED docker.io
+  # Build docker images
+  build_image:
+    steps:
+      - run:
+          name: Build Docker Images
+          command:  docker build -t bikclu/sample-app:$CIRCLE_SHA1  .
+
+jobs:
+  build_and_push:
+    docker:
+    - image:  circleci/buildpack-deps:stretch
+    steps:
+      - checkout
+      - login
+      - docker_caching  
+      - build_image
+      - run:
+          name: Push docker image
+          command: |
+                   docker push bikclu/sample-app:$CIRCLE_SHA1
+                   sed "s/imageTag/${CIRCLE_SHA1}/g" -i .myapp-helm-chart/values.yaml         
+
+workflows:
+  version: 2
+  build-sample-app:
+    jobs:
+      - build_and_push:
+          filters:
+            branches:
+              only:
+                - main

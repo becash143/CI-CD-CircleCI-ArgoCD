@@ -1,0 +1,20 @@
+server.port: 8090
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:mysql://127.0.0.1/assignment?allowPublicKeyRetrieval=true
+    username: root
+    password: P@ssw0rd
+    driver-class-name: com.mysql.jdbc.Driver
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info,health,prometheus

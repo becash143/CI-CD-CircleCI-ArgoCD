@@ -1,0 +1,6 @@
+/tmp/circleci-and-ArgoCD-CI-CD/src/main/java/com/sample/devops/assignment/repository/PersonRepository.java
+/tmp/circleci-and-ArgoCD-CI-CD/src/main/java/com/sample/devops/assignment/repository/PersonEntity.java
+/tmp/circleci-and-ArgoCD-CI-CD/src/main/java/com/sample/devops/assignment/controller/PersonController.java
+/tmp/circleci-and-ArgoCD-CI-CD/src/main/java/com/sample/devops/assignment/controller/Person.java
+/tmp/circleci-and-ArgoCD-CI-CD/src/main/java/com/sample/devops/assignment/controller/PersonMapper.java
+/tmp/circleci-and-ArgoCD-CI-CD/src/main/java/com/sample/devops/assignment/Application.java

@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "myapp.fullname" . }}
+  labels:
+    app: {{ template "myapp.fullname" . }}
+spec:  
+  selector:
+    matchLabels:
+      app: {{ template "myapp.fullname" . }}
+  replicas: {{ .Values.ReplicaCount }}
+  template:     
+    metadata:
+      labels:
+        app: {{ template "myapp.fullname" . }}
+    spec:
+      initContainers:
+        - name: db-check
+          image: "{{ .Values.mysql.image}}:{{ .Values.mysql.imageTag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy | quote }}
+          env:
+            - name: HOST
+              value: mysql-service
+            {{- if .Values.mysqlAllowEmptyPassword }}
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD
+              value: "true"
+            {{- end }}
+            {{- if not (and .Values.allowEmptyRootPassword (not .Values.mysqlRootPassword)) }}  
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                 secretKeyRef:
+                    name: myapp-secret
+                    key: MYSQL_ROOT_PASSWORD
+                     {{- if .Values.mysqlAllowEmptyPassword }}
+                    optional: true
+              {{- end }}
+             {{- end }}
+            - name: PORT
+              value: '3306'
+          command: [ "sh", "-c" ]
+          args:
+            - echo starting;
+              chmod +x /tmp/my-config.sh;
+              sh /tmp/my-config.sh;
+              
+              echo done;
+          volumeMounts:
+             - name: workdir
+               mountPath: "/tmp"               
+      containers:
+        - image: "{{ .Values.myapp.image}}:{{ .Values.myapp.imageTag }}"
+          name: myapp
+          imagePullPolicy: Always
+          env:
+           - name: "{{ .Values.dialect_name }}"
+             value: "{{ .Values.dialect_value }}"
+           - name: SPRING_DATASOURCE_DRIVER-CLASS-NAME
+             value: com.mysql.cj.jdbc.Driver
+           - name: SPRING_DATASOURCE_URL
+             value: jdbc:mysql://mysql/assignment?allowPublicKeyRetrieval=true
+           - name: SPRING_DATASOURCE_USERNAME
+             value: root
+          resources:
+             requests:
+               cpu: 50m
+               memory: 128Mi
+          livenessProbe:
+             httpGet:
+               path: /persons/
+               port: app-port
+               
+             initialDelaySeconds: 60
+             periodSeconds: 60
+             
+          readinessProbe:
+             httpGet:
+               path: /actuator/health
+               port: app-port
+             initialDelaySeconds: 60
+             periodSeconds: 60
+                  
+          ports:
+           - containerPort: 8090
+             name: app-port
+
+      volumes:
+       - name: workdir
+         configMap:
+           name: {{ template "myapp.fullname" . }}-configuration
+             

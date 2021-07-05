@@ -1,0 +1,6 @@
+com/sample/devops/assignment/repository/PersonEntity.class
+com/sample/devops/assignment/controller/Person.class
+com/sample/devops/assignment/Application.class
+com/sample/devops/assignment/repository/PersonRepository.class
+com/sample/devops/assignment/controller/PersonController.class
+com/sample/devops/assignment/controller/PersonMapper.class

@@ -1,0 +1,20 @@
+server.port: 8090
+
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:h2:mem:assignment
+    driver-class-name: org.h2.Driver
+
+  profiles: h2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: info,health,prometheus
