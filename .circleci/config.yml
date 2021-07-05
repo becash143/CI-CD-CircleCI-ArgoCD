@@ -41,7 +41,7 @@ jobs:
           name: Push docker image
           command: |
                    docker push bikclu/sample-app:$CIRCLE_SHA1
-                   sed "s/imageTag/${CIRCLE_SHA1}/g" -i .myapp-helm-chart/values.yaml         
+                   sed "s/imageTag: .*/imageTag: ${CIRCLE_SHA1}/g" -i ./myapp-helm-chart/values.yaml         
 
 workflows:
   version: 2
