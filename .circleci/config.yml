@@ -26,7 +26,7 @@ commands:
     steps:
       - run:
           name: Build Docker Images
-          command:  docker build -t bikclu/sample-app:$CIRCLE_SHA1  .
+          command:  docker build --build-arg code_version=210705-4c3fcd3 --build-arg db-name=mysql  -t bikclu/sample-app:$CIRCLE_SHA1 .
 
 jobs:
   build_and_push:
