@@ -5,13 +5,15 @@
 ```helm install my-sample-app ./myapp-helm-chart``` 
 
 Configure as per ArgoCD document [ArgoCD](https://argo-cd.readthedocs.io/en/stable/).
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg1.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_sync.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd.png) 
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/circleci_build.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/pod_status.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/sampleapp_log.png) 
 
-![Alt text](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd.png ?raw=true "Optional ArgoCD config")
-![Alt text](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd.png ?raw=true "Optional ArgoCD config")
-![Alt text](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/circleci_build.png ?raw=true "Optional circleci build")
-![Alt text](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/circleci.png ?raw=true "Optional circleci")
-![Alt text](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/pod_status.png  ?raw=true "Optional Running Pods")
-![Alt text](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/sampleapp_log.png  ?raw=true "Optional sample-app log")
 
 ---
 **NOTE**
