@@ -48,6 +48,8 @@ workflows:
   build-sample-app:
     jobs:
       - build_and_push:
+          context:
+           - MY_CRED
           filters:
             branches:
               only:
