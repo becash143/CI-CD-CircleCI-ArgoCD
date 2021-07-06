@@ -18,7 +18,7 @@ Configure as per ArgoCD document [ArgoCD](https://argo-cd.readthedocs.io/en/stab
 ---
 **NOTE**
 
-ArgoCD updates the application based on the github commits. Here, as soon as circleci pushes the image to private docker hub registry, ArgoCD updates the images, since the imageTag in values.yaml is updated in the bild process.
+ArgoCD updates the application based on the github commits. Here, as soon as CircleCI pushes the image to private docker hub registry, ArgoCD updates the images, since the imageTag in values.yaml is updated during build process.
 
 ---
 
