@@ -5,14 +5,14 @@
 ```helm install my-sample-app ./myapp-helm-chart``` 
 
 Configure as per ArgoCD document [ArgoCD](https://argo-cd.readthedocs.io/en/stable/).
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg1.png)
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg.png)
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_cfg2.png)
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd_sync.png)
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/argocd.png) 
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/circleci_build.png)
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/pod_status.png)
-![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/sampleapp_log.png) 
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/images/argocd_cfg1.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/images/argocd_cfg.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/images/argocd_cfg2.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/images/argocd_sync.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/images/argocd.png) 
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/images/circleci_build.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/images/pod_status.png)
+![image](https://github.com/becash143/circleci-and-ArgoCD-CI-CD/blob/main/images/sampleapp_log.png) 
 
 
 ---
