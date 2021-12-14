@@ -4,7 +4,7 @@
 
 myapp:
  image: bikclu/sample-app
- imageTag: 1
+ imageTag: 765385e41c34fdb2a290c62fa94ed71861bfa0bb
 mysql: 
   image: mysql
   imageTag: "8.0"
