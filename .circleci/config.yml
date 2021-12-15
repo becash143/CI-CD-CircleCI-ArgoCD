@@ -42,7 +42,7 @@ jobs:
       - login
       - docker_caching  
       - build_image
-      - push image
+      - push_image
       - run:
           name: Update Image tag
           command: |
