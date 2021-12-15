@@ -30,8 +30,8 @@ commands:
   push_image:
     steps:
       - run:
-        name: Push latest Image to ECR
-        command: docker push bikclu/sample-app:$CIRCLE_SHA1
+          name: Push latest Image to ECR
+          command: docker push bikclu/sample-app:$CIRCLE_SHA1
 
 jobs:
   build_and_push:
