@@ -51,7 +51,6 @@ jobs:
                    git config --global user.name "Bikash Bhandari"
                    git add ./myapp-helm-chart/values.yaml
                    git commit -m "Updating image tag with latest build number."
-                   git push
 
 workflows:
   version: 2
