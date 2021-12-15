@@ -41,6 +41,7 @@ jobs:
           name: Push docker image
           command: |
                    docker push bikclu/sample-app:$CIRCLE_SHA1
+                   pwd
                    sed "1,/imageTag/s/imageTag: .*/imageTag: ${CIRCLE_SHA1}/g" -i ./myapp-helm-chart/values.yaml
                    git config --global user.email "bikash.bhandari1986@gmail.com"
                    git config --global user.name "Bikash Bhandari"
