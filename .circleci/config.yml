@@ -27,6 +27,16 @@ commands:
       - run:
           name: Build Docker Images
           command:  docker build --build-arg code_version=210705-4c3fcd3 --build-arg db-name=mysql  -t bikclu/sample-app:$CIRCLE_SHA1 .
+  update_image_tag:
+    steps:
+      - run:
+        name: Update sample image tag
+        command: |
+                   sed "1,/imageTag/s/imageTag: .*/imageTag: ${CIRCLE_SHA1}/g" -i ./myapp-helm-chart/values.yaml
+                   git config --global user.email "bikash.bhandari1986@gmail.com"
+                   git config --global user.name "Bikash Bhandari"
+                   git add ./myapp-helm-chart/values.yaml
+                   git commit -m "Updating image tag with latest build number."        
 
 jobs:
   build_and_push:
@@ -41,13 +51,7 @@ jobs:
           name: Push docker image
           command: |
                    docker push bikclu/sample-app:$CIRCLE_SHA1
-                   pwd
-                   sed "1,/imageTag/s/imageTag: .*/imageTag: ${CIRCLE_SHA1}/g" -i ./myapp-helm-chart/values.yaml
-                   git config --global user.email "bikash.bhandari1986@gmail.com"
-                   git config --global user.name "Bikash Bhandari"
-                   git add ./myapp-helm-chart/values.yaml
-                   git commit -m "Updating image tag with latest build number."
-         
+      - update_image_tag
 
 workflows:
   version: 2
