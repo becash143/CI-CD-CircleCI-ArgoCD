@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "annotationlab.fullname" . }}-cacert-bundle-script
+  labels:
+    {{- include "annotationlab.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+data:
+  script.py: |-
+    import json
+    import os
+    import requests
+    import sys
+
+    with open('/run/secrets/kubernetes.io/serviceaccount/token') as token_f:
+      token = token_f.read()
+      headers = {'Content-type': 'application/json', 'Authorization': 'Bearer {}'.format(token)}
+
+      with open('/usr/local/lib/python3.10/site-packages/certifi/cacert.pem') as original_ca_bundle_f:
+        original_ca_bundle = original_ca_bundle_f.readlines()
+        if os.path.isfile('/tmp/cacert-bundle-script/cacert.pem'):
+          custom_cacert_f = open('/tmp/cacert-bundle-script/cacert.pem')
+          custom_cacert = custom_cacert_f.readlines()
+          original_ca_bundle += custom_cacert
+        try:
+          ret = requests.get("https://kubernetes.default:443/api/v1/namespaces/{{ .Release.Namespace }}/configmaps/cacert-bundle", verify='/run/secrets/kubernetes.io/serviceaccount/ca.crt', headers=headers)
+          if ret.status_code == 404:
+            data = {
+              'apiVersion': 'v1',
+              'kind': 'ConfigMap',
+              'metadata': {
+                'name': 'cacert-bundle'
+              },
+              'data': {
+                'cacert.pem': ''.join(original_ca_bundle)
+              }
+            }
+            ret = requests.post("https://kubernetes.default:443/api/v1/namespaces/{{ .Release.Namespace }}/configmaps", verify='/run/secrets/kubernetes.io/serviceaccount/ca.crt', data=json.dumps(data), headers=headers)
+          else:
+            data = [
+              {
+                'op': 'add',
+                'path': '/data',
+                'value': {
+                  'cacert.pem': ''.join(original_ca_bundle)
+                }
+              }
+            ]
+            headers = {'Content-type': 'application/json-patch+json', 'Authorization': 'Bearer {}'.format(token)}
+            ret = requests.patch("https://kubernetes.default:443/api/v1/namespaces/{{ .Release.Namespace }}/configmaps/cacert-bundle", verify='/run/secrets/kubernetes.io/serviceaccount/ca.crt', data=json.dumps(data), headers=headers)
+        except requests.RequestException as error:
+          print(error)
+          sys.exit(1)
+  cacert.pem: |-
+    {{- if .Values.custom_cacert }}{{- .Values.custom_cacert | nindent 4 }}{{- end}}

@@ -1,0 +1,12 @@
+#############################################################################
+
+Thank you for installing {{ .Chart.Name }}. Please run the following commands to get the credentials.
+
+export KEYCLOAK_CLIENT_SECRET_KEY=$(kubectl get secret {{ include "annotationlab.fullname" . }}-secret --template={{ "{{" }}.data.KEYCLOAK_CLIENT_SECRET_KEY{{ "}}" }} | base64 --decode; echo)
+export PG_PASSWORD=$(kubectl get secrets {{ include "annotationlab.postgresql.fullname" . }}  -o yaml | grep '  postgresql-password:' | cut -d ' ' -f 4 | base64 -d; echo)
+{{- if .Values.installKeycloak }}
+export PG_KEYCLOAK_PASSWORD=$(kubectl get secrets {{ include "annotationlab.keycloak.fullname" . }}-postgres -o yaml | grep '  postgresql-password:' | cut -d ' ' -f 4 | base64 -d; echo)
+export ADMIN_PASSWORD=$(kubectl get secret {{ include "annotationlab.keycloak.fullname" . }}-admincreds --template={{ "{{" }}.data.password{{ "}}" }} | base64 --decode; echo)
+{{- end }}
+
+#############################################################################

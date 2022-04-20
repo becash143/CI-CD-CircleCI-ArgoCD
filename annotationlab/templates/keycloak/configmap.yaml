@@ -1,0 +1,202 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "annotationlab.fullname" . }}-keycloak-config
+  labels:
+    {{- include "annotationlab.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+data:
+  kcadm.sh: |-
+    #!/bin/bash
+    /opt/jboss/keycloak/bin/kcadm.sh "$@" --config /tmp/kcadm.conf ${TRUSTSTORE}
+  init.sh: |-
+    #!/bin/bash
+    set -e
+    export KEYCLOAK_SERVER_URL="{{ include "annotationlab.keycloak.internal_url" . }}"
+    export KCADM=/tmp/kcadm.sh
+    cp /configure/kcadm.sh $KCADM
+    chmod +x $KCADM
+    if [[ -n "{{ .Values.configuration.TRUSTSTORE_JKS_SECRET }}" ]]; then
+      export TRUSTSTORE="--truststore /truststore/truststore.jks --trustpass {{ .Values.configuration.TRUSTSTORE_JKS_PASSWORD }}"
+    fi
+    echo "Keycloak Configuration Started on: " ${KEYCLOAK_SERVER_URL}
+    while ! curl -k -so/dev/null ${KEYCLOAK_SERVER_URL}; do echo 'Retrying connection to Keycloak Server...'; sleep 5; done
+    $KCADM config credentials \
+      --server ${KEYCLOAK_SERVER_URL%/} \
+      --realm {{ .Values.configuration.KEYCLOAK_REALM_NAME }} \
+      --user ${KEYCLOAK_USERNAME} \
+      --password ${KEYCLOAK_PASSWORD}
+    echo "Login Successful"
+    if [[ -z "{{ .Values.configuration.KEYCLOAK_SERVER_URL }}" ]]; then
+      bash /configure/keycloak_config.sh
+    fi
+    bash /configure/client_config.sh
+  keycloak_config.sh: |-
+    #!/bin/bash
+    $KCADM update realms/{{ .Values.configuration.KEYCLOAK_REALM_NAME }} -s displayNameHtml='<div><img height="100" src="https://www.johnsnowlabs.com/wp-content/uploads/2019/05/johnsnowlabs_logo.png" alt="John Snow Labs - Annotation Lab" /></div>'
+    $KCADM update realms/{{ .Values.configuration.KEYCLOAK_REALM_NAME }} -s displayName="John Snow Labs - Annotation Lab" -s loginTheme=johnsnowlabs -s accountTheme=johnsnowlabs -s adminTheme=johnsnowlabs
+    echo "Realm {{ .Values.configuration.KEYCLOAK_REALM_NAME }} updated"
+    $KCADM update realms/{{ .Values.configuration.KEYCLOAK_REALM_NAME }} -s accessTokenLifespan=900 -s userManagedAccessAllowed=true
+    echo "Access Token set to 900 seconds"
+    $KCADM update realms/{{ .Values.configuration.KEYCLOAK_REALM_NAME }} -s sslRequired=NONE
+    echo "SSL Requirement for realm set to NONE"
+  client_config.sh: |-
+    #!/bin/bash
+    echo "Client Creating..."
+    KEYCLOAK_CLIENT_ID=`$KCADM get clients -q clientId=annotationlab --format csv --fields id --noquotes`
+    if [[ -z $KEYCLOAK_CLIENT_ID ]]; then
+      KEYCLOAK_CLIENT_ID=`$KCADM create clients -f /configure/client.json -i`
+      echo "Client ${KEYCLOAK_CLIENT_ID} created"
+    else
+      $KCADM update clients/${KEYCLOAK_CLIENT_ID} -f /configure/client.json
+      echo "Client ${KEYCLOAK_CLIENT_ID} updated"
+    fi
+
+    echo "Enabling Group mapping in access token"
+    $KCADM create clients/$KEYCLOAK_CLIENT_ID/protocol-mappers/models -s name=GroupMapper -s protocol=openid-connect -s 'config."access.token.claim"=true' -s 'config."claim.name"=groups' -s protocolMapper=oidc-group-membership-mapper
+    echo "Import authorizations..."
+    $KCADM create clients/$KEYCLOAK_CLIENT_ID/authz/resource-server/import -f /configure/authorizationsettings.json
+    echo "Client authorizations imported"
+    ANNOTATOR_GROUP_UUID=`$KCADM get groups --format csv | grep Annotators | cut -f2 -d\"`
+    if [[ -z $ANNOTATOR_GROUP_UUID ]]; then
+      ANNOTATOR_GROUP_UUID=`$KCADM create groups -s name=Annotators -s path=/Annotators -i`
+    fi
+    $KCADM add-roles --gname Annotators --cclientid {{ .Values.configuration.KEYCLOAK_CLIENT_ID }} --rolename uma_protection
+    REALM_MGMT_CLIENT={{ .Values.configuration.KEYCLOAK_REALM_NAME }}-realm
+    if [[ {{ .Values.configuration.KEYCLOAK_REALM_NAME }} != master ]]; then
+      REALM_MGMT_CLIENT=realm-management
+    fi
+    $KCADM add-roles --gname Annotators --cclientid $REALM_MGMT_CLIENT --rolename view-users --rolename view-events
+    USER_ADMINS_GROUP_UUID=`$KCADM get groups --format csv | grep UserAdmins | cut -f2 -d\"`
+    if [[ -z $USER_ADMINS_GROUP_UUID ]]; then
+      USER_ADMINS_GROUP_UUID=`$KCADM create groups -s name=UserAdmins -s path=/UserAdmins -i`
+    fi
+    $KCADM add-roles --gid $USER_ADMINS_GROUP_UUID --cclientid $REALM_MGMT_CLIENT --rolename manage-users
+    $KCADM add-roles --gid $USER_ADMINS_GROUP_UUID --cclientid $REALM_MGMT_CLIENT --rolename query-users
+    $KCADM add-roles --gid $USER_ADMINS_GROUP_UUID --cclientid $REALM_MGMT_CLIENT --rolename query-groups
+    $KCADM update users-management-permissions -s enabled=true
+    ADMIN_USER=`$KCADM get users --fields id --query username=admin --format csv --noquotes`
+    $KCADM update users/$ADMIN_USER/groups/$ANNOTATOR_GROUP_UUID -s userId=$ADMIN_USER  -s groupId=$ANNOTATOR_GROUP_UUID -n
+    $KCADM update users/$ADMIN_USER/groups/$USER_ADMINS_GROUP_UUID -s userId=$ADMIN_USER  -s groupId=$USER_ADMINS_GROUP_UUID -n
+    CLIENT_ID=`$KCADM get clients --fields id --query clientId=$REALM_MGMT_CLIENT --format CSV --noquotes`
+    $KCADM create clients/$CLIENT_ID/authz/resource-server/import -f /configure/impersonateSettings.json
+    $KCADM update events/config -r {{ .Values.configuration.KEYCLOAK_REALM_NAME }} -s eventsEnabled=true -s 'enabledEventTypes=[\"LOGIN\"]'
+    echo "Script Executed Successfully!"
+  client.json: |-
+    {
+      "clientId": "{{ .Values.configuration.KEYCLOAK_CLIENT_ID }}",
+      "rootUrl": "{{ include "annotationlab.url" . }}",
+      "baseUrl": "{{ include "annotationlab.base_url" . }}",
+      "surrogateAuthRequired": false,
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "{{ .Values.configuration.KEYCLOAK_CLIENT_SECRET_KEY }}",
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "notBefore": 0,
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "authorizationServicesEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect"
+    }
+  authorizationsettings.json: |-
+    {
+      "allowRemoteResourceManagement": true,
+      "policyEnforcementMode": "ENFORCING",
+      "resources": [],
+      "policies": [
+        {
+          "name": "ResourceClient",
+          "description": "Defines the client that can use the resources",
+          "type": "client",
+          "logic": "POSITIVE",
+          "decisionStrategy": "UNANIMOUS",
+          "config": {
+            "clients": "[\"{{ .Values.configuration.KEYCLOAK_CLIENT_ID }}\"]"
+          }
+        },
+        {
+          "name": "ResourcePermissions",
+          "type": "scope",
+          "decisionStrategy": "UNANIMOUS",
+          "config": {
+            "scopes": "[\"Update\",\"Create\",\"View\",\"Delete\",\"DeleteTask\",\"RenameTask\",\"Export\",\"Import\",\"ShareProject\",\"Annotator\",\"Reviewer\",\"Manager\"]",
+            "applyPolicies": "[\"ResourceClient\"]"
+          }
+        }
+      ],
+      "scopes": [
+        {
+          "name": "Export"
+        },
+        {
+          "name": "Update"
+        },
+        {
+          "name": "Delete"
+        },
+        {
+          "name": "DeleteTask"
+        },
+        {
+          "name": "RenameTask"
+        },
+        {
+          "name": "View"
+        },
+        {
+          "name": "Create"
+        },
+        {
+          "name": "Import"
+        },
+        {
+          "name": "ShareProject"
+        },
+        {
+          "name": "Annotator"
+        },
+        {
+          "name": "Reviewer"
+        },
+        {
+          "name": "Manager"
+        }
+      ],
+      "decisionStrategy": "UNANIMOUS"
+    }
+  impersonateSettings.json: |-
+    {
+      "policies": [
+        {
+          "name": "ImpersonatePolicy",
+          "type": "client",
+          "logic": "POSITIVE",
+          "decisionStrategy": "UNANIMOUS",
+          "config": {
+            "clients": "[\"{{ .Values.configuration.KEYCLOAK_CLIENT_ID }}\"]"
+          }
+        },
+        {
+          "name": "admin-impersonating.permission.users",
+          "type": "scope",
+          "logic": "POSITIVE",
+          "decisionStrategy": "UNANIMOUS",
+          "config": {
+            "resources": "[\"Users\"]",
+            "scopes": "[\"impersonate\"]",
+            "applyPolicies": "[\"ImpersonatePolicy\"]"
+          }
+        }
+      ]
+    }
+

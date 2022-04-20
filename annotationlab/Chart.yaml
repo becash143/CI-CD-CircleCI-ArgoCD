@@ -1,0 +1,16 @@
+apiVersion: v2
+appVersion: 2.8.1
+dependencies:
+- condition: installKeycloak
+  name: keycloak
+  repository: https://codecentric.github.io/helm-charts
+  version: 9.0.1
+- condition: installPostgresql
+  name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 9.1.1
+description: JohnSnowLabs Annotation Lab
+home: https://www.johnsnowlabs.com
+name: annotationlab
+type: application
+version: 2.8.1
