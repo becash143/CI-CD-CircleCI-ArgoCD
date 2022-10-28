@@ -1,0 +1,13 @@
+{
+  "appName": "dir-example",
+  "userGivenName": "dir-example",
+  "destNamespace": "default",
+  "destServer": "https://kubernetes.default.svc",
+  "srcPath": ".",
+  "srcRepoURL": "https://github.com/becash143/CI-CD-CircleCI-ArgoCD.git",
+  "srcTargetRevision": "",
+  "labels": null,
+  "annotations": null,
+  "exclude": "",
+  "include": ""
+}
