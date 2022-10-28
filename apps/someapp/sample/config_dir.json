@@ -1,0 +1,13 @@
+{
+  "appName": "someapp",
+  "userGivenName": "someapp",
+  "destNamespace": "default",
+  "destServer": "https://kubernetes.default.svc",
+  "srcPath": "myapp-helm-chart/templates/",
+  "srcRepoURL": "./CI-CD-CircleCI-ArgoCD.git",
+  "srcTargetRevision": "",
+  "labels": null,
+  "annotations": null,
+  "exclude": "",
+  "include": ""
+}
