@@ -1,0 +1,13 @@
+{
+  "appName": "dir-example",
+  "userGivenName": "dir-example",
+  "destNamespace": "default",
+  "destServer": "https://kubernetes.default.svc",
+  "srcPath": "examples/demo-dir/",
+  "srcRepoURL": "https://github.com/argoproj-labs/argocd-autopilot.git",
+  "srcTargetRevision": "",
+  "labels": null,
+  "annotations": null,
+  "exclude": "",
+  "include": ""
+}
